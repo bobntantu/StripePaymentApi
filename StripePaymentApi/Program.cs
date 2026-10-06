@@ -1,15 +1,34 @@
+
+using Microsoft.EntityFrameworkCore;
+using StripePaymentApi.Configuration;
+using StripePaymentApi.Data;
+using StripePaymentApi.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+// Controllers
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Database
+builder.Services.AddDbContext<PaymentDbContext>(options =>
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    ));
+
+// Stripe configuration
+builder.Services.Configure<StripeSettings>(
+    builder.Configuration.GetSection("Stripe"));
+
+// Stripe payment service
+builder.Services.AddScoped<StripePaymentService>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Development tools
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -23,3 +42,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
